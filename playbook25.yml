@@ -1,0 +1,45 @@
+---
+- name: Congifuring apache/httpd based on OS platforms
+  hosts: all
+  tasks:
+    - name: Install apache2 on Ubuntu servers
+      apt:
+        name: apache2
+        state: present
+        update_cache: yes
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Install httpd on RedHat servers
+      yum: 
+        name: httpd
+        state: present
+        update_cache: yes
+      when: ansible_distribution == "RedHat"
+
+    - name: Edit the index.html file
+      copy:
+        content: "Welcome to Intelliq"
+        dest: /var/www/html/index.html
+
+    - name: Restart apache2 on Ubuntu
+      service:
+        name: apache2
+        state: restarted
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Restart httpd on RedHat
+      service:
+        name: httpd
+        state: restarted
+      when: ansible_distribution == "RedHat"
+
+    - name: Check apache/https reponse on all the servers
+      uri:
+        url: "{{item}}"
+        status_code: 200
+      with_items:
+         - http://172.31.8.185
+         - http://172.31.5.44
+         - http://172.31.2.149       
+        
+...
